@@ -194,7 +194,7 @@
 
   <script>
     (function(){
-  const MS = 1400;   // bigger = slower scrolling
+  const MS = 1600;   // bigger = slower scrolling
   document.documentElement.style.scrollBehavior = 'auto';
   Element.prototype.scrollIntoView = function(){
     const target = Math.max(0, this.getBoundingClientRect().top + window.scrollY - 100);
