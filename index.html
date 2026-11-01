@@ -193,6 +193,24 @@
   </footer>
 
   <script>
+    (function(){
+  const MS = 1400;   // bigger = slower scrolling
+  document.documentElement.style.scrollBehavior = 'auto';
+  Element.prototype.scrollIntoView = function(){
+    const target = Math.max(0, this.getBoundingClientRect().top + window.scrollY - 100);
+    const start = window.scrollY, dist = target - start;
+    if (Math.abs(dist) < 2) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { window.scrollTo(0, target); return; }
+    const dur = Math.min(MS, 500 + Math.abs(dist) * 0.7);
+    const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+    const t0 = performance.now();
+    (function step(now){
+      const p = Math.min(1, (now - t0) / dur);
+      window.scrollTo(0, start + dist * ease(p));
+      if (p < 1) requestAnimationFrame(step);
+    })(t0);
+  };
+})();
     // ================= EDITABLE CONTENT =================
 
     // A topic can have optional `subtopics`. To add a sub-section, add a line
