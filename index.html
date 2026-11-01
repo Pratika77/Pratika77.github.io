@@ -12,271 +12,377 @@
   <style>
     :root{ --dark:#183a1d; --cream:#e1eedd; --accent:#f0a04b; --muted:#556158; --card:#ffffff; --maxw:1200px; }
     *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial; margin:0; color:#0b2316; background:var(--cream);} 
+    html{scroll-behavior:smooth; scroll-padding-top:100px}
+    body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial; margin:0; color:#0b2316; background:var(--cream);}
+    [hidden]{display:none !important}
+    :focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 
-    /* HEADER */
+    /* HEADER (unchanged look) */
     header{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.95)); border-bottom:1px solid rgba(11,34,20,0.06); position:sticky; top:0; z-index:40}
     .container{max-width:var(--maxw); margin:0 auto; padding:16px}
     .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px}
-    .brand{display:flex; gap:12px; align-items:center}
+    .brand{display:flex; gap:12px; align-items:center; text-decoration:none; color:inherit}
     .logo{width:54px; height:54px; border-radius:8px; background:var(--dark); display:flex; align-items:center; justify-content:center; color:var(--cream); font-weight:700}
-    .brand h1{margin:0; font-size:18px; color:var(--dark)}
+    .brand-name{margin:0; font-size:18px; font-weight:700; color:var(--dark)}
     nav{display:flex; gap:8px; align-items:center}
     nav a{color:var(--dark); text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:600}
-    nav a:hover{background:rgba(24,58,29,0.06)}
+    nav a:hover, nav a[aria-current="page"]{background:rgba(24,58,29,0.06)}
     .search{display:flex; gap:8px; align-items:center}
-    .search input{padding:8px 10px; border-radius:8px; border:1px solid rgba(11,34,20,0.08); width:220px}
+    .search input{padding:8px 10px; border-radius:8px; border:1px solid rgba(11,34,20,0.08); width:220px; font:inherit; font-size:14px}
 
-    /* HERO / CATEGORIES */
-    .hero{padding:26px 0}
+    /* TOPIC TILES (same tiles, now with counts + active state) */
+    .hero{padding:26px 16px}
     .category-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px}
-    .cat{background:var(--card); padding:18px; border-radius:8px; box-shadow:0 8px 24px rgba(11,34,20,0.03); display:flex; flex-direction:column; gap:8px; align-items:flex-start}
-    .cat h3{margin:0; color:var(--dark); font-size:16px}
-    .cat p{margin:0; color:var(--muted); font-size:13px}
+    .cat{background:var(--card); padding:18px; border-radius:8px; box-shadow:0 8px 24px rgba(11,34,20,0.03); display:flex; flex-direction:column; gap:8px; align-items:flex-start; text-align:left; border:2px solid transparent; font:inherit; cursor:pointer; color:inherit}
+    .cat:hover{border-color:rgba(24,58,29,0.15)}
+    .cat[aria-pressed="true"]{border-color:var(--dark)}
+    .cat[disabled]{cursor:default; opacity:.55}
+    .cat strong{color:var(--dark); font-size:16px}
+    .cat span{color:var(--muted); font-size:13px}
+    .cat .count{font-weight:600; color:var(--dark); font-size:12px; background:var(--cream); padding:2px 8px; border-radius:6px}
 
     /* LAYOUT */
-    main{max-width:var(--maxw); margin:0 auto; padding:8px}
-    .two-col{display:grid; grid-template-columns: 1fr 320px; gap:20px}
+    main{max-width:var(--maxw); margin:0 auto; padding:8px 16px}
+    .two-col{display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:20px}
     .card{background:var(--card); padding:16px; border-radius:10px; box-shadow:0 8px 30px rgba(11,34,20,0.03)}
-    h2.section{margin:0 0 12px; color:var(--dark)}
+    .section-head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin:0 0 12px}
+    .section-head h2{margin:0; color:var(--dark)}
+    .section-head a{color:var(--dark); font-size:14px; font-weight:600}
 
-    /* ARTICLE CARDS */
+    /* ARTICLE CARDS (same style) */
     .articles{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px}
-    .article{background:linear-gradient(180deg,#fff,#fff); border-radius:10px; overflow:hidden; border:1px solid rgba(11,34,20,0.04); display:flex; flex-direction:column}
-    .article img{width:100%; height:160px; object-fit:cover}
-    .article-content{padding:12px}
+    .article{background:#fff; border-radius:10px; overflow:hidden; border:1px solid rgba(11,34,20,0.06); display:flex; flex-direction:column}
+    .thumb{position:relative; height:160px; background:var(--dark); display:flex; align-items:flex-end; padding:12px}
+    .thumb img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+    .thumb span{position:relative; color:var(--cream); font-weight:700; font-size:20px}
+    .article-content{padding:12px; display:flex; flex-direction:column; flex:1}
     .article h3{margin:0 0 8px; color:var(--dark)}
     .article p{margin:0; color:var(--muted); font-size:14px}
-    .article .meta{margin-top:10px; display:flex; justify-content:space-between; align-items:center}
-    .pill{background:var(--cream); color:var(--dark); padding:6px 8px; border-radius:8px; font-weight:600}
-
-    /* SIDEBAR */
-    .sidebar .searchbox{display:block; margin-bottom:12px}
-    .sidebar .list{display:flex; flex-direction:column; gap:8px}
+    .article .meta{margin-top:auto; padding-top:12px; display:flex; justify-content:space-between; align-items:center}
+    .pill{background:var(--cream); color:var(--dark); padding:6px 8px; border-radius:8px; font-weight:600; font-size:13px}
+    .empty{color:var(--muted); padding:24px 0; text-align:center}
 
     /* ARTICLE PAGE */
-    .article-page{background:var(--card); padding:22px; border-radius:10px}
-    .article-page h1{margin-top:0}
+    .crumbs{font-size:14px; color:var(--muted); margin-bottom:12px}
+    .crumbs a{color:var(--dark); font-weight:600; text-decoration:none}
+    .crumbs a:hover{text-decoration:underline}
+    .article-page{padding:22px}
+    .article-page h1{margin:8px 0 6px; color:var(--dark); line-height:1.2}
     .article-page img{max-width:100%; border-radius:8px}
-    .article-body{line-height:1.65; color:#163021}
+    .article-body{line-height:1.7; color:#163021; font-size:16px}
+    .article-body h2, .article-body h3{color:var(--dark); margin:1.6em 0 .4em}
+    .article-body li{margin:.3em 0}
+    .pager{display:flex; justify-content:space-between; gap:12px; margin-top:24px; padding-top:16px; border-top:1px solid rgba(11,34,20,0.08)}
+    .pager a{color:var(--dark); font-weight:600; text-decoration:none; max-width:48%}
+    .pager a:hover{text-decoration:underline}
 
-    /* GALLERY / FIGURES */
-    .figure{margin:12px 0; border-radius:8px; overflow:hidden}
+    /* SIDEBAR */
+    .sidebar{display:flex; flex-direction:column; gap:12px; align-self:start}
+    .sidebar h3{margin-top:0; color:var(--dark)}
+    .sidebar .list{display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none}
+    .sidebar .list a{color:var(--dark); text-decoration:none}
+    .sidebar .list a:hover{text-decoration:underline}
+    .toc a{display:block; padding:4px 0 4px 10px; border-left:3px solid transparent; color:var(--muted) !important}
+    .toc a.sub{padding-left:22px; font-size:14px}
+    .toc a.active{border-left-color:var(--accent); color:var(--dark) !important; font-weight:600}
+    .gallery{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+    .gallery img{width:100%; height:60px; object-fit:cover; border-radius:6px}
 
     /* FOOTER */
     footer{padding:18px 0; margin-top:24px; color:var(--muted); text-align:center}
 
     /* RESPONSIVE */
     @media (max-width:980px){ .two-col{grid-template-columns:1fr} .sidebar{order:2} }
-    @media (max-width:560px){ nav{display:none} .search input{width:120px} }
+    @media (max-width:560px){
+      .topbar{flex-wrap:wrap} nav{order:3; width:100%} .search{flex:1} .search input{width:100%}
+      .logo{width:44px; height:44px}
+    }
 
-    /* small helpers */
     .muted{color:var(--muted)}
-    .btn{background:var(--dark); color:var(--cream); padding:8px 12px; border-radius:8px; text-decoration:none}
+    .btn{background:var(--dark); color:var(--cream); padding:8px 12px; border-radius:8px; text-decoration:none; border:0; font:inherit; font-weight:600; font-size:14px; cursor:pointer}
   </style>
 </head>
 <body>
   <header>
     <div class="container topbar">
-      <div class="brand">
+      <a class="brand" href="#/">
         <div class="logo">PK</div>
         <div>
-          <h1>Pratika Khatiwada</h1>
+          <div class="brand-name">Pratika Khatiwada</div>
           <div class="muted" style="font-size:13px">Psychology notes • educational resources</div>
         </div>
-      </div>
+      </a>
       <nav aria-label="Main navigation">
-        <a href="#">Psychology</a>
-        <a href="#">Personality</a>
-        <a href="#">Theories</a>
-        <a href="#">DSM-5</a>
-        <a href="#">Notes</a>
+        <a href="#/" data-nav="home">Home</a>
+        <a href="#/" data-nav="topics">Topics</a>
+        <a href="#/" data-nav="about">About</a>
       </nav>
-      <div class="search">
-        <input id="searchInput" placeholder="Search topics or theories..." />
-        <a class="btn" href="#" onclick="searchArticles();return false;">Search</a>
-      </div>
+      <form class="search" role="search" id="searchForm">
+        <input id="searchInput" type="search" placeholder="Search topics or theories..." aria-label="Search notes" />
+        <button class="btn" type="submit">Search</button>
+      </form>
     </div>
   </header>
 
-  <!-- HERO / CATEGORIES like simplypsychology tiles -->
-  <section class="container hero">
-    <div class="category-grid">
-      <!-- categories are editable via JS array -->
-    </div>
+  <!-- TOPIC TILES: the one place topics are listed -->
+  <section class="container hero" id="topics" aria-label="Topics">
+    <div class="category-grid" id="categoryGrid"></div>
   </section>
 
   <main>
     <div class="two-col">
       <div>
-        <section class="card">
-          <h2 class="section">Featured Articles</h2>
-          <div class="articles" id="articlesList">
-            <!-- article cards injected by JS -->
+        <!-- LIST VIEW -->
+        <section class="card" id="listView">
+          <div class="section-head">
+            <h2 id="listTitle">Featured Notes</h2>
+            <a href="#/" id="showAll" hidden>Show all</a>
           </div>
+          <div class="articles" id="articlesList"></div>
+          <p class="empty" id="emptyMsg" hidden>No notes match that yet. <a href="#/" id="clearSearch">Show all notes</a></p>
         </section>
 
-        <section id="articlePage" style="display:none; margin-top:16px"></section>
+        <!-- ARTICLE VIEW (replaces the list while reading) -->
+        <section class="card article-page" id="articleView" hidden>
+          <div class="crumbs" id="crumbs"></div>
+          <h1 id="artTitle"></h1>
+          <p class="muted" id="artMeta" style="margin-top:0"></p>
+          <div class="article-body" id="artBody"></div>
+          <nav class="pager" id="pager" aria-label="More notes"></nav>
+        </section>
       </div>
 
       <aside class="sidebar">
-        <div class="card">
-          <h3 style="margin-top:0">About</h3>
-          <p class="muted">This website is maintained by Pratika Khatiwada, providing concise notes, diagrams, and memory aids for psychology students.</p>
+        <div class="card toc" id="tocCard" hidden>
+          <h3>On this page</h3>
+          <ul class="list" id="tocList"></ul>
         </div>
 
-        <div class="card" style="margin-top:12px">
-          <h3 style="margin-top:0">Popular</h3>
-          <div class="list" id="popularList"></div>
+        <div class="card" id="about">
+          <h3>About</h3>
+          <p class="muted" style="margin-bottom:0">Concise notes, diagrams, and memory aids for psychology students, by Pratika Khatiwada.</p>
         </div>
 
-        <div class="card" style="margin-top:12px">
-          <h3 style="margin-top:0">Gallery</h3>
-          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px" id="miniGallery"></div>
+        <div class="card" id="moreCard" hidden>
+          <h3 id="moreTitle">Recently updated</h3>
+          <ul class="list" id="moreList"></ul>
+        </div>
+
+        <div class="card" id="galleryCard" hidden>
+          <h3>Gallery</h3>
+          <div class="gallery" id="miniGallery"></div>
         </div>
       </aside>
     </div>
   </main>
 
   <footer>
-    <div class="container">
-      <div>© <span id="year"></span> Pratika Khatiwada — Educational psychology notes. Built with a clean, student-focused design.</div>
-    </div>
+    <div class="container">© <span id="year"></span> Pratika Khatiwada — Educational psychology notes.</div>
   </footer>
 
   <script>
-    // ===== Editable content arrays =====
+    // ================= EDITABLE CONTENT =================
+
     const categories = [
-      {slug:'psychology', title:'Psychology', desc:'Core concepts and summaries.'},
+      {slug:'psychology',  title:'Psychology',  desc:'Core concepts and summaries.'},
       {slug:'personality', title:'Personality', desc:'Profiles and trait theories.'},
-      {slug:'theories', title:'Theories', desc:'Classic and modern theories.'},
-      {slug:'dsm5', title:'DSM-5', desc:'Disorders and diagnostic criteria.'},
-      {slug:'notes', title:'Notes', desc:'Quick revision notes and charts.'}
+      {slug:'theories',    title:'Theories',    desc:'Classic and modern theories.'},
+      {slug:'dsm5',        title:'DSM-5',       desc:'Disorders and diagnostic criteria.'},
+      {slug:'notes',       title:'Notes',       desc:'Quick revision notes and charts.'}
     ];
 
+    // `content` = the body of the note ONLY. Title, category and date are
+    // shown automatically, so don't repeat them inside `content`.
+    // Use <h2>/<h3> for sections — they build the "On this page" box.
+    // `draft:true` hides a note (add ?drafts to the URL to preview drafts).
     const articles = [
       {
-  id: 'psych_core',
-  title: 'Psychology: Core Concepts & Summaries',
-  category: 'psychology',
-  img: 'images/psych1.jpg', // replace with your image
-  excerpt: 'Overview of psychology, its major branches, and historical emergence.',
-  date: '2025-12-04',
-  content: `
-    <div class="article-page card">
-      <h1>Psychology: Core Concepts & Summaries</h1>
-      <p class="muted">Category: Psychology • <em>Updated: 2025-12-04</em></p>
-      <div class="article-body">
-        <h3>What Is Psychology?</h3>
-        <p>Psychology is the scientific study of behavior and mental processes...</p>
-        <h3>Major Branches of Psychology</h3>
-        <ul>
-          <li><strong>Clinical Psychology:</strong> Assessment, diagnosis, and treatment of mental, emotional, and behavioral disorders.</li>
-          <li><strong>Counseling Psychology:</strong> Supports coping with everyday challenges and personal growth.</li>
-          <li><strong>Developmental Psychology:</strong> Studies psychological changes across the lifespan.</li>
-          <li><strong>Social Psychology:</strong> Examines influence of others on thoughts, feelings, and behavior.</li>
-          <li><strong>Cognitive Psychology:</strong> Investigates attention, memory, language, problem-solving, and decision-making.</li>
-          <li><strong>Biological Psychology:</strong> Studies brain structures, neurotransmitters, hormones, and genetics.</li>
-          <li><strong>Industrial-Organizational Psychology:</strong> Applies psychology to workplaces and organizational behavior.</li>
-          <li><strong>Health Psychology:</strong> Focuses on psychological and social factors affecting health.</li>
-        </ul>
-        <h3>Historical Emergence</h3>
-        <ul>
-          <li><strong>Ancient Greece:</strong> Plato and Aristotle pondered mind and behavior.</li>
-          <li><strong>17th–18th Century:</strong> Descartes and Locke discussed mind-body and empiricism.</li>
-          <li><strong>1879:</strong> Wilhelm Wundt established the first psychology lab in Germany.</li>
-          <li><strong>Schools of Thought:</strong> Structuralism, Functionalism, Psychoanalysis, Behaviorism, Humanistic Psychology.</li>
-          <li><strong>Mid-20th Century Onward:</strong> Cognitive revolution; modern psychology integrates multiple perspectives.</li>
-        </ul>
-        <h3>Summary</h3>
-        <p>Psychology is the scientific study of behavior and mental processes, with multiple branches recognized by APA. It emerged as a science in 1879 and has evolved into a diverse, evidence-based field combining biological, cognitive, social, and cultural perspectives.</p>
-      </div>
-    </div>`
-},
+        id: 'psych_core',
+        title: 'Psychology: Core Concepts & Summaries',
+        category: 'psychology',
+        img: 'images/psych1.jpg',
+        excerpt: 'Overview of psychology, its major branches, and historical emergence.',
+        date: '2025-12-04',
+        content: `
+          <h3>What Is Psychology?</h3>
+          <p>Psychology is the scientific study of behavior and mental processes...</p>
+          <h3>Major Branches of Psychology</h3>
+          <ul>
+            <li><strong>Clinical Psychology:</strong> Assessment, diagnosis, and treatment of mental, emotional, and behavioral disorders.</li>
+            <li><strong>Counseling Psychology:</strong> Supports coping with everyday challenges and personal growth.</li>
+            <li><strong>Developmental Psychology:</strong> Studies psychological changes across the lifespan.</li>
+            <li><strong>Social Psychology:</strong> Examines influence of others on thoughts, feelings, and behavior.</li>
+            <li><strong>Cognitive Psychology:</strong> Investigates attention, memory, language, problem-solving, and decision-making.</li>
+            <li><strong>Biological Psychology:</strong> Studies brain structures, neurotransmitters, hormones, and genetics.</li>
+            <li><strong>Industrial-Organizational Psychology:</strong> Applies psychology to workplaces and organizational behavior.</li>
+            <li><strong>Health Psychology:</strong> Focuses on psychological and social factors affecting health.</li>
+          </ul>
+          <h3>Historical Emergence</h3>
+          <ul>
+            <li><strong>Ancient Greece:</strong> Plato and Aristotle pondered mind and behavior.</li>
+            <li><strong>17th–18th Century:</strong> Descartes and Locke discussed mind-body and empiricism.</li>
+            <li><strong>1879:</strong> Wilhelm Wundt established the first psychology lab in Germany.</li>
+            <li><strong>Schools of Thought:</strong> Structuralism, Functionalism, Psychoanalysis, Behaviorism, Humanistic Psychology.</li>
+            <li><strong>Mid-20th Century Onward:</strong> Cognitive revolution; modern psychology integrates multiple perspectives.</li>
+          </ul>
+          <h3>Summary</h3>
+          <p>Psychology is the scientific study of behavior and mental processes, with multiple branches recognized by APA. It emerged as a science in 1879 and has evolved into a diverse, evidence-based field combining biological, cognitive, social, and cultural perspectives.</p>`
+      },
 
-      
-      // sample article structure — add/edit these objects to create pages
+      // ---- Templates: copy one, fill it in, then delete `draft:true` ----
       {
-        id:'a1',
-        title:'Theory Template: Explain it in simple terms',
-        category:'theories',
-        img:'images/sample1.jpg',
+        id:'a1', title:'Theory Template: Explain it in simple terms', category:'theories',
+        img:'images/sample1.jpg', date:'2025-10-27', draft:true,
         excerpt:'Short, memorable summary designed for exam revision and quick recall.',
-        date:'2025-10-27',
-        content:`<div class="article-page card"><h1>Theory Title</h1><p class="muted">Category: Theories • <em>Updated: 2025-10-27</em></p><div class="figure"><img src="images/figure1.jpg" alt="figure" /></div><div class="article-body"><h3>Quick summary</h3><p>Write a concise paragraph that students can memorize.</p><h3>Key points</h3><ul><li>Point 1</li><li>Point 2</li></ul><h3>Memory tips</h3><p>Mnemonics, analogies, and simple diagrams.</p></div></div>`
+        content:`<div class="figure"><img src="images/figure1.jpg" alt="figure" /></div><h3>Quick summary</h3><p>Write a concise paragraph that students can memorize.</p><h3>Key points</h3><ul><li>Point 1</li><li>Point 2</li></ul><h3>Memory tips</h3><p>Mnemonics, analogies, and simple diagrams.</p>`
       },
       {
-        id:'a2',
-        title:'Sample DSM-5 Article: Disorder overview template',
-        category:'dsm5',
-        img:'images/sample2.jpg',
+        id:'a2', title:'Sample DSM-5 Article: Disorder overview template', category:'dsm5',
+        img:'images/sample2.jpg', date:'2025-10-20', draft:true,
         excerpt:'Clinical features, diagnostic criteria, and brief management notes.',
-        date:'2025-10-20',
-        content:`<div class="article-page card"><h1>Disorder Title (DSM-5)</h1><p class="muted">Category: DSM-5 • <em>Updated: 2025-10-20</em></p><div class="figure"><img src="images/figure2.jpg" alt="figure" /></div><div class="article-body"><h3>What is it?</h3><p>Short definition and context.</p><h3>Criteria (short)</h3><ol><li>Criterion A</li><li>Criterion B</li></ol><h3>Clinical tips</h3><p>How to remember and apply.</p></div></div>`
+        content:`<div class="figure"><img src="images/figure2.jpg" alt="figure" /></div><h3>What is it?</h3><p>Short definition and context.</p><h3>Criteria (short)</h3><ol><li>Criterion A</li><li>Criterion B</li></ol><h3>Clinical tips</h3><p>How to remember and apply.</p>`
       }
     ];
 
+    // Images that fail to load are skipped; the Gallery box hides if none load.
     const gallery = [ 'images/sample1.jpg','images/sample2.jpg','images/sample3.jpg','images/sample4.jpg' ];
 
-    // ===== Render functions =====
+    // ================= APP (no need to edit below) =================
+
+    const $ = id => document.getElementById(id);
+    const showDrafts = new URLSearchParams(location.search).has('drafts');
+    const published = articles.filter(a => showDrafts || !a.draft).sort((a,b) => b.date.localeCompare(a.date));
+    const catName = slug => (categories.find(c => c.slug === slug) || {title:slug}).title;
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const text = html => { const d = document.createElement('div'); d.innerHTML = html; return d.textContent; };
+    const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
+    const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+
+    let activeCat = null, query = '', tocObserver;
+
     function renderCategories(){
-      const grid = document.querySelector('.category-grid'); grid.innerHTML='';
-      categories.forEach(c=>{
-        const el = document.createElement('a'); el.className='cat card'; el.href='#'; el.innerHTML = `<h3>${c.title}</h3><p>${c.desc}</p>`;
-        el.onclick = (e)=>{ e.preventDefault(); filterByCategory(c.slug); };
-        grid.appendChild(el);
+      $('categoryGrid').innerHTML = categories.map(c => {
+        const n = published.filter(a => a.category === c.slug).length;
+        return `<button type="button" class="cat" data-cat="${c.slug}" aria-pressed="${activeCat === c.slug}" ${n ? '' : 'disabled'}>
+          <strong>${esc(c.title)}</strong><span>${esc(c.desc)}</span>
+          <span class="count">${n ? `${n} note${n > 1 ? 's' : ''}` : 'Coming soon'}</span></button>`;
+      }).join('');
+    }
+
+    function renderList(){
+      const q = query.trim().toLowerCase();
+      const list = published.filter(a =>
+        (!activeCat || a.category === activeCat) &&
+        (!q || (a.title + ' ' + a.excerpt + ' ' + catName(a.category) + ' ' + text(a.content)).toLowerCase().includes(q)));
+
+      $('listTitle').textContent = q ? `Results for “${query.trim()}”` : activeCat ? catName(activeCat) : 'Featured Notes';
+      $('showAll').hidden = !(q || activeCat);
+      $('emptyMsg').hidden = list.length > 0;
+      $('articlesList').innerHTML = list.map(a => `
+        <article class="article">
+          <div class="thumb">
+            ${a.img ? `<img src="${esc(a.img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+            <span>${esc(catName(a.category))}</span>
+          </div>
+          <div class="article-content">
+            <h3>${esc(a.title)}${a.draft ? ' <small class="muted">(draft)</small>' : ''}</h3>
+            <p>${esc(a.excerpt)}</p>
+            <div class="meta"><span class="muted" style="font-size:13px">${fmtDate(a.date)}</span><a class="btn" href="#/note/${a.id}">Read</a></div>
+          </div>
+        </article>`).join('');
+    }
+
+    function renderMore(excludeId){
+      const others = published.filter(a => a.id !== excludeId).slice(0, 5);
+      $('moreCard').hidden = others.length === 0;
+      $('moreTitle').textContent = excludeId ? 'More notes' : 'Recently updated';
+      $('moreList').innerHTML = others.map(a => `<li><a href="#/note/${a.id}">${esc(a.title)}</a></li>`).join('');
+    }
+
+    function renderGallery(){
+      gallery.forEach(src => {
+        const i = new Image(); i.alt = ''; i.src = src;
+        i.onload = () => { $('miniGallery').appendChild(i); $('galleryCard').hidden = false; };
       });
     }
 
-    function renderArticles(list=articles){
-      const out = document.getElementById('articlesList'); out.innerHTML='';
-      list.forEach(a=>{
-        const node = document.createElement('article'); node.className='article';
-        node.innerHTML = `<img src='${a.img}' alt='${a.title}' onerror="this.style.opacity=.6; this.style.filter='grayscale(20%)'"/><div class='article-content'><h3>${a.title}</h3><p>${a.excerpt}</p><div class='meta'><div class='pill'>${a.category}</div><a class='btn' href='#' onclick="openArticle('${a.id}');return false;">Read</a></div></div>`;
-        out.appendChild(node);
-      });
+    function renderArticle(id){
+      const i = published.findIndex(a => a.id === id);
+      if (i < 0) { location.hash = '#/'; return; }
+      const a = published[i];
+      document.title = `${a.title} — Pratika Khatiwada`;
+      $('crumbs').innerHTML = `<a href="#/">← All notes</a> &nbsp;/&nbsp; <a href="#/topic/${a.category}">${esc(catName(a.category))}</a>`;
+      $('artTitle').textContent = a.title;
+      $('artMeta').textContent = `Updated ${fmtDate(a.date)}`;
+      $('artBody').innerHTML = a.content;
+      $('artBody').querySelectorAll('img').forEach(img => img.onerror = () => (img.closest('.figure') || img).remove());
+
+      // "On this page" from the note's own headings
+      const heads = [...$('artBody').querySelectorAll('h2, h3')];
+      const top = heads.some(h => h.tagName === 'H2') ? 'H2' : 'H3';
+      heads.forEach(h => h.id = h.id || slugify(h.textContent));
+      $('tocCard').hidden = heads.length < 2;
+      $('tocList').innerHTML = heads.map(h =>
+        `<li><a href="#${h.id}" data-target="${h.id}" class="${h.tagName !== top ? 'sub' : ''}">${esc(h.textContent)}</a></li>`).join('');
+      tocObserver?.disconnect();
+      tocObserver = new IntersectionObserver(es => es.forEach(e => {
+        if (e.isIntersecting) $('tocList').querySelectorAll('a').forEach(l => l.classList.toggle('active', l.dataset.target === e.target.id));
+      }), {rootMargin:'-100px 0px -70% 0px'});
+      heads.forEach(h => tocObserver.observe(h));
+
+      const prev = published[i - 1], next = published[i + 1];
+      $('pager').innerHTML = (prev ? `<a href="#/note/${prev.id}">← ${esc(prev.title)}</a>` : '<span></span>') +
+                             (next ? `<a href="#/note/${next.id}" style="text-align:right">${esc(next.title)} →</a>` : '');
+      renderMore(a.id);
     }
 
-    function renderPopular(){
-      const el = document.getElementById('popularList'); el.innerHTML='';
-      articles.slice(0,5).forEach(a=>{ const d = document.createElement('div'); d.innerHTML = `<a href='#' onclick="openArticle('${a.id}');return false;">${a.title}</a>`; el.appendChild(d); });
+    // Routes: #/   #/topic/<slug>   #/note/<id>
+    function route(){
+      const [, view, param] = (location.hash || '#/').split('/');
+      const reading = view === 'note';
+      $('topics').hidden = reading;
+      $('listView').hidden = reading;
+      $('articleView').hidden = !reading;
+      if (!reading) $('tocCard').hidden = true;
+      document.querySelector('[data-nav="home"]').toggleAttribute('aria-current', !reading);
+
+      if (reading) renderArticle(param);
+      else {
+        document.title = 'Pratika Khatiwada — Psychology Notes & Teaching';
+        activeCat = view === 'topic' ? param : null;
+        renderCategories(); renderList(); renderMore();
+      }
+      window.scrollTo(0, 0);
     }
 
-    function renderMiniGallery(){
-      const g = document.getElementById('miniGallery'); g.innerHTML='';
-      gallery.forEach(src=>{ const i = document.createElement('img'); i.src=src; i.style.width='100%'; i.style.height='60px'; i.style.objectFit='cover'; i.style.borderRadius='6px'; i.onerror=function(){this.style.opacity=.5}; g.appendChild(i); });
-    }
+    // ---- Events ----
+    $('categoryGrid').addEventListener('click', e => {
+      const b = e.target.closest('.cat'); if (!b || b.disabled) return;
+      location.hash = activeCat === b.dataset.cat ? '#/' : `#/topic/${b.dataset.cat}`;
+    });
+    document.querySelector('nav').addEventListener('click', e => {
+      const t = e.target.closest('[data-nav]')?.dataset.nav;
+      if (t === 'topics' || t === 'about') {
+        e.preventDefault();
+        if (location.hash.startsWith('#/note')) location.hash = '#/';
+        setTimeout(() => $(t).scrollIntoView(), 0);
+      }
+    });
+    $('tocList').addEventListener('click', e => {
+      const l = e.target.closest('a[data-target]'); if (!l) return;
+      e.preventDefault(); $(l.dataset.target).scrollIntoView();
+    });
+    const runSearch = () => { query = $('searchInput').value; if (location.hash.startsWith('#/note')) location.hash = '#/'; else renderList(); };
+    $('searchInput').addEventListener('input', runSearch);
+    $('searchForm').addEventListener('submit', e => { e.preventDefault(); runSearch(); $('listView').scrollIntoView(); });
+    [$('showAll'), $('clearSearch')].forEach(a => a.addEventListener('click', () => {
+      $('searchInput').value = ''; query = ''; if ((location.hash || '#/') === '#/') renderList();
+    }));
+    window.addEventListener('hashchange', route);
 
-    function openArticle(id){
-      const art = articles.find(x=>x.id===id); if(!art) return;
-      const page = document.getElementById('articlePage'); page.style.display='block'; page.innerHTML = art.content + '<p style="margin-top:12px"><a href="#" onclick="closeArticle();return false;">Back to list</a></p>';
-      window.scrollTo({top:0, behavior:'smooth'});
-    }
-    function closeArticle(){ document.getElementById('articlePage').style.display='none'; }
-
-    function filterByCategory(cat){ renderArticles(articles.filter(a=>a.category===cat)); }
-
-    function searchArticles(){ const q = document.getElementById('searchInput').value.toLowerCase(); renderArticles( articles.filter(a=> (a.title+a.excerpt).toLowerCase().includes(q) ) ); }
-
-    // ===== Init =====
-    document.getElementById('year').textContent = new Date().getFullYear();
-    renderCategories(); renderArticles(); renderPopular(); renderMiniGallery();
-
-    // ===== Instructions for editing =====
-    /*
-      HOW TO EDIT:
-      - Replace images: upload files to images/ and update paths in the arrays above (articles[].img and gallery[]).
-      - Add a new article: create a new object in the articles array with fields id,title,category,img,excerpt,date,content.
-      - Content accepts HTML strings (use <h3>, <p>, <ul>, <img src="...">).
-      - To add more categories, edit the categories array.
-
-      HOSTING ON GITHUB PAGES:
-      1. Create repo named pratikakhatiwada.github.io (or yourusername.github.io)
-      2. Add this file as index.html
-      3. Create an images/ folder and upload images used by your articles
-      4. In repo Settings -> Pages, set Source to main branch and / (root)
-      5. Wait 1-2 minutes and visit https://yourusername.github.io
-    */
+    $('year').textContent = new Date().getFullYear();
+    renderGallery();
+    route();
   </script>
 </body>
 </html>
